@@ -1,0 +1,18 @@
+<button id="btn">Load items</button>
+<ul id="list"></ul>
+
+<script>
+document.getElementById("btn").addEventListener("click", async () => {
+    const res = await fetch("http://127.0.0.1:8000/items/");
+    const data = await res.json();
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item.name;
+        list.appendChild(li);
+    });
+});
+</script>
