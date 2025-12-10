@@ -1,8 +1,11 @@
-from django.contrib import admin
 from django.urls import path
-from store.views import get_items
+from store import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('items/', get_items),
+    path("health/", views.health),
+    path("items/", views.list_items),         # GET
+    path("items/", views.create_item),        # POST
+    path("items/<int:item_id>/", views.get_item),     # GET by id
+    path("items/<int:item_id>/", views.update_item),  # PUT
+    path("items/<int:item_id>/", views.delete_item),  # DELETE
 ]
