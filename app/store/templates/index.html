@@ -1,36 +1,50 @@
 {% load static %}
-<style>
-    /* CSS для Degraded Mode */
-    .degraded-mode #degraded_status {
-        color: white;
-        background-color: darkred;
-        padding: 10px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-    }
-    .degraded-mode button:not(#btn_load) {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    .degraded-mode button#btn_load {
-        opacity: 1;
-        cursor: pointer;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Team Shop Client</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
 
-<div id="degraded_status" style="display:none;">
-    Увага: Система перевантажена або недоступна. Увімкнено Degraded Mode.
-</div>
+    <div id="degraded-banner">⚠️ System overloaded. Degraded Mode enabled.</div>
 
-<button id="btn_load">Load items</button>
-<ul id="list"></ul>
+    <h2>🛍️ Shop Client</h2>
+    
+    <div style="margin-bottom: 10px;">
+        <button id="btn_load" class="api-btn btn-add">Load Items</button>
+        <button id="btn_toggle_list" class="api-btn btn-test" onclick="toggleList()">Hide list</button>
+        <button id="btn_health" class="api-btn btn-test">Check Health (Timeout 1s)</button>
+    </div>
 
-<hr>
-<h3>Тестування надійності:</h3>
-<button id="btn_500">Симулювати 500 ERROR (Backoff)</button>
-<button id="btn_429">Симулювати 429 Rate Limit (Retry-After)</button>
-<button id="btn_timeout">Симулювати Таймаут (1с)</button>
-<button id="btn_network">Симулювати Мережевий Збій (Degraded Mode)</button>
-<hr>
+    <ul id="list"></ul>
+    
+    <div id="status-area">Waiting for actions...</div>
 
-<script src="{% static 'js/script.js' %}"></script>
+    <hr>
+    <h3>Testing (Simulation):</h3>
+    <button id="btn_500" class="api-btn btn-test">Test 500 (Retry & Degraded)</button>
+    <button id="btn_429" class="api-btn btn-test">Test 429 (Rate Limit)</button>
+    <button id="btn_timeout" class="api-btn btn-test">Test Timeout (Server sleeps 2s)</button>
+    <hr>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    
+    <script>
+        // --- List Visibility Toggle ---
+        function toggleList() {
+            const list = document.getElementById("list");
+            const btn = document.getElementById("btn_toggle_list");
+            
+            if (list.style.display === "none") {
+                list.style.display = "block";
+                btn.textContent = "Hide list";
+            } else {
+                list.style.display = "none";
+                btn.textContent = "Show list";
+            }
+        }
+    </script>
+</body>
+</html>

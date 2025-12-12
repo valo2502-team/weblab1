@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Team Shop Admin</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        .list-header h3 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="degraded-banner">⚠️ System overloaded. Editing functions limited.</div>
+
+    <h1>⚙️ Admin Panel</h1>
+
+    <div class="add-section">
+        <h3>Add New Item</h3>
+        <div style="display: flex;">
+            <input type="text" id="new-item-name" placeholder="Item name..." style="flex-grow: 1; padding: 10px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;">
+            <button class="btn-add api-btn" onclick="createItem()">Create</button>
+        </div>
+    </div>
+
+    <div class="list-header">
+        <h3>Items List</h3>
+        <button id="btn-toggle-list" class="api-btn btn-test" onclick="toggleList()">Hide list</button>
+    </div>
+
+    <div id="admin-list">Loading...</div>
+
+    <div id="status-area"></div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000/items/";
+
+        // Load on start
+        loadAdminItems();
+
+        function toggleList() {
+            const list = document.getElementById("admin-list");
+            const btn = document.getElementById("btn-toggle-list");
+            
+            if (list.style.display === "none") {
+                list.style.display = "block";
+                btn.textContent = "Hide list";
+                if (list.innerHTML === "") loadAdminItems(); 
+            } else {
+                list.style.display = "none";
+                btn.textContent = "Show list";
+            }
+        }
+
+        async function loadAdminItems() {
+            const list = document.getElementById("admin-list");
+            if (list.style.display === "none") return;
+
+            try {
+                if (!list.innerHTML.includes("input")) list.innerHTML = "Updating...";
+                
+                const res = await fetchWithRetry(API_URL);
+                const items = await res.json();
+
+                list.innerHTML = "";
+                items.forEach((item, index) => {
+                    const row = document.createElement("div");
+                    row.className = "item-row";
+                    row.innerHTML = `
+                        <span style="min-width: 30px; font-weight:bold;">#${index + 1}</span>
+                        <span style="color: #999; font-size: 0.8em; margin-right: 10px;">(id: ${item.id})</span>
+                        <input type="text" id="input-${item.id}" value="${item.name}">
+                        <button class="btn-save api-btn" onclick="updateItem(${item.id})">Save</button>
+                        <button class="btn-delete api-btn" onclick="deleteItem(${item.id})">Delete</button>
+                    `;
+                    list.appendChild(row);
+                });
+                logStatus(`Loaded ${items.length} items.`);
+            } catch (err) {
+                logStatus(`Error loading items: ${err.error}`, true);
+            }
+        }
+
+        // CREATE (POST)
+        async function createItem() {
+            const input = document.getElementById("new-item-name");
+            const name = input.value;
+            if (!name) return alert("Enter a name!");
+
+            const idempotencyKey = "create-" + Date.now(); 
+
+            try {
+                await fetchWithRetry(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Idempotency-Key": idempotencyKey
+                    },
+                    body: JSON.stringify({ name: name })
+                });
+                input.value = ""; 
+                
+                const list = document.getElementById("admin-list");
+                if (list.style.display !== "none") {
+                    loadAdminItems(); 
+                }
+                
+                logStatus("Item created.");
+            } catch (err) {
+                logStatus(`Create failed: ${err.error}`, true);
+            }
+        }
+
+        // UPDATE (PUT)
+        async function updateItem(id) {
+            const newName = document.getElementById(`input-${id}`).value;
+            try {
+                await fetchWithRetry(`${API_URL}${id}/`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: newName })
+                });
+                logStatus(`Item ${id} updated.`);
+            } catch (err) {
+                logStatus(`Update failed: ${err.error}`, true);
+            }
+        }
+
+        // DELETE (DELETE)
+        async function deleteItem(id) {
+            if(!confirm("Are you sure?")) return;
+
+            try {
+                await fetchWithRetry(`${API_URL}${id}/`, {
+                    method: "DELETE"
+                });
+                loadAdminItems(); 
+                logStatus(`Item ${id} deleted.`);
+            } catch (err) {
+                logStatus(`Delete failed: ${err.error}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
