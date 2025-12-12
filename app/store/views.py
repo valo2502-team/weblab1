@@ -4,6 +4,10 @@ from django.views.decorators.http import require_http_methods
 import json
 from .service import ItemService
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
+
+def item_list_page(request):
+    return render(request, 'index.html', {})
 
 def health(request):
     return JsonResponse({"status": "ok"})
