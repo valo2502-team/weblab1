@@ -3,9 +3,9 @@ from store import views
 
 urlpatterns = [
     path("health/", views.health),
-    path("items/", views.list_items),         # GET
-    path("items/", views.create_item),        # POST
-    path("items/<int:item_id>/", views.get_item),     # GET by id
-    path("items/<int:item_id>/", views.update_item),  # PUT
-    path("items/<int:item_id>/", views.delete_item),  # DELETE
+    path("items/simulate/", views.simulate_error_api),
+    path("items/", views.items_api), # GET (list) and POST
+    path("items/<int:item_id>/", views.item_detail_api), # GET (by id), PUT (update), DELETE
+    path("custom-admin/", views.admin_page),
+    path("", views.item_list_page),
 ]

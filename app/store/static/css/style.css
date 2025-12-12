@@ -1,0 +1,108 @@
+body {
+    font-family: sans-serif;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fdfdfd;
+}
+
+/* --- Заголовки та текст --- */
+h1, h2, h3 {
+    color: #333;
+}
+
+/* --- Банер Degraded Mode --- */
+#degraded-banner {
+    display: none; /* Приховано за замовчуванням */
+    background-color: #ffcc00;
+    color: #333;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #e6b800;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+/* --- Кнопки --- */
+button {
+    padding: 8px 12px;
+    cursor: pointer;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+button:disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+    color: #666;
+}
+
+button:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.api-btn {
+    padding: 10px 15px;
+    font-size: 15px;
+}
+
+/* Кольори кнопок */
+.btn-save { background-color: #28a745; color: white; }
+.btn-delete { background-color: #dc3545; color: white; }
+.btn-add { background-color: #007bff; color: white; font-size: 16px; }
+.btn-test { background-color: #f0f0f0; border: 1px solid #ccc; color: #333; }
+
+/* --- Елементи списку та форми (Admin) --- */
+.item-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.item-row span {
+    margin-right: 10px;
+    font-weight: bold;
+    color: #555;
+    min-width: 30px;
+}
+
+.item-row input {
+    flex-grow: 1;
+    padding: 8px;
+    margin-right: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-section {
+    background: #f0f0f0;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* --- Область статусів --- */
+#status-area {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    min-height: 50px;
+    font-family: monospace;
+    border-radius: 4px;
+    white-space: pre-wrap; /* Зберігає форматування JSON */
+}
+
+.error-msg { color: #d32f2f; font-weight: bold; }
+.success-msg { color: #388e3c; }
