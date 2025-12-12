@@ -30,3 +30,13 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} × {self.item.name}"
+    
+class IdempotencyRecord(models.Model):
+    idempotency_key = models.CharField(max_length=255, unique=True, db_index=True)
+    endpoint = models.CharField(max_length=255)
+    response_status = models.IntegerField()
+    response_data = models.TextField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Idempotency Record for {self.idempotency_key} on {self.endpoint}"

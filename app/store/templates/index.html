@@ -1,18 +1,36 @@
-<button id="btn">Load items</button>
+{% load static %}
+<style>
+    /* CSS для Degraded Mode */
+    .degraded-mode #degraded_status {
+        color: white;
+        background-color: darkred;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    .degraded-mode button:not(#btn_load) {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .degraded-mode button#btn_load {
+        opacity: 1;
+        cursor: pointer;
+    }
+</style>
+
+<div id="degraded_status" style="display:none;">
+    Увага: Система перевантажена або недоступна. Увімкнено Degraded Mode.
+</div>
+
+<button id="btn_load">Load items</button>
 <ul id="list"></ul>
 
-<script>
-document.getElementById("btn").addEventListener("click", async () => {
-    const res = await fetch("http://127.0.0.1:8000/items/");
-    const data = await res.json();
+<hr>
+<h3>Тестування надійності:</h3>
+<button id="btn_500">Симулювати 500 ERROR (Backoff)</button>
+<button id="btn_429">Симулювати 429 Rate Limit (Retry-After)</button>
+<button id="btn_timeout">Симулювати Таймаут (1с)</button>
+<button id="btn_network">Симулювати Мережевий Збій (Degraded Mode)</button>
+<hr>
 
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-
-    data.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = item.name;
-        list.appendChild(li);
-    });
-});
-</script>
+<script src="{% static 'js/script.js' %}"></script>
