@@ -1,6 +1,6 @@
 # Team-Shop - невеликий онлайн-магазин техніки. 
 
-Клієнти можуть переглядати товари через веб-браузер, а бекенд на Django забезпечує доступ до бази даних (SQLite). Система відображає список товарів та дозволяє адміністратору додавати або редагувати товари.
+Клієнти можуть переглядати товари через веб-браузер, а бекенд на Django забезпечує доступ до бази даних (SQLite/PostgreSQL). Система відображає список товарів та дозволяє адміністратору додавати або редагувати товари.
 
 ## API документація
 
@@ -51,7 +51,7 @@ docker compose up --build
 | **Health Check** | [http://localhost:8000/health/](http://localhost:8000/health/) | Перевірка стану системи (суворий таймаут 1с). |
 
 
-![CI/CD Status](https://github.com/valo2502/weblab1/actions/workflows/ci-cd.yml/badge.svg)
+![CI/CD Status](https://github.com/valo2502-team/weblab1/actions/workflows/ci-cd.yml/badge.svg)
 
 ## CI/CD Implementation
 
@@ -69,9 +69,9 @@ docker compose up --build
 
 ### Як отримати образ:
 ```bash
-docker pull ghcr.io/valo2502/weblab1:master 
+docker pull ghcr.io/valo2502-team/weblab1:master 
 ```
 ### Як запустити образ:
 ```bash
-docker run -p 8000:8000 ghcr.io/valo2502/weblab1:master
+docker run -p 8000:8000 ghcr.io/valo2502-team/weblab1:master
 ```
