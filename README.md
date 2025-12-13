@@ -49,3 +49,29 @@ docker compose up --build
 | **Адмін-панель** | [http://localhost:8000/custom-admin/](http://localhost:8000/custom-admin/) | Інтерфейс для створення, редагування та видалення товарів. |
 | **API Endpoint** | [http://localhost:8000/items/](http://localhost:8000/items/) | "Сира" JSON відповідь API. |
 | **Health Check** | [http://localhost:8000/health/](http://localhost:8000/health/) | Перевірка стану системи (суворий таймаут 1с). |
+
+
+![CI/CD Status](https://github.com/valo2502-team/weblab1/actions/workflows/ci-cd.yml/badge.svg)
+
+## CI/CD Implementation
+
+### Опис рішення:
+1.  **CI (Continuous Integration):**
+    * На кожному пуші запускається workflow, який встановлює залежності, перевіряє код лінтером `flake8` та запускає unit-тести Django.
+    * Для тестів використовується ізольований сервіс PostgreSQL.
+2.  **CD (Continuous Delivery):**
+    * Після успішного проходження тестів збирається Docker-образ веб-додатка.
+    * Образ автоматично пушиться в **GitHub Container Registry (GHCR)**.
+3.  **Style Points (Виконані вимоги):**
+    * ✅ **Concurrency:** Налаштовано автоматичне скасування старих білдів на тій самій гілці.
+    * ✅ **Minimal Permissions:** Права токену чітко обмежені (`contents: read`, `packages: write`).
+    * ✅ **Smart Tagging:** Використовуються теги `main`, `sha-<commit_hash>` та семантичні версії `vX.Y.Z`.
+
+### Як отримати образ:
+```bash
+docker pull ghcr.io/valo2502-team/weblab1:master 
+```
+### Як запустити образ:
+```bash
+docker run -p 8000:8000 ghcr.io/valo2502-team/weblab1:master
+```
