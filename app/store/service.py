@@ -1,38 +1,39 @@
+from django.core.exceptions import ValidationError
 from .models import Item
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 class ItemService:
     @staticmethod
-    def list_items():
-        return list(Item.objects.values())
+    def create_item(data):
+        if "name" not in data or not data["name"]:
+            raise ValidationError("Name is required")
+
+        item = Item.objects.create(name=data["name"])
+        return {"id": item.id, "name": item.name}
 
     @staticmethod
-    def create_item(data):
-        name = data.get("name")
-        if not name:
-            raise ValidationError("Field 'name' is required")
-        item = Item.objects.create(name=name)
-        return {"id": item.id, "name": item.name}
+    def list_items():
+        items = Item.objects.all()
+        return [{"id": item.id, "name": item.name} for item in items]
 
     @staticmethod
     def get_item(item_id):
         try:
             item = Item.objects.get(id=item_id)
             return {"id": item.id, "name": item.name}
-        except ObjectDoesNotExist:
+        except Item.DoesNotExist:
             return None
 
     @staticmethod
     def update_item(item_id, data):
+        if "name" not in data or not data["name"]:
+            raise ValidationError("Name is required")
+
         try:
             item = Item.objects.get(id=item_id)
-            name = data.get("name")
-            if not name:
-                raise ValidationError("Field 'name' is required")
-            item.name = name
+            item.name = data["name"]
             item.save()
             return {"id": item.id, "name": item.name}
-        except ObjectDoesNotExist:
+        except Item.DoesNotExist:
             return None
 
     @staticmethod
@@ -41,5 +42,5 @@ class ItemService:
             item = Item.objects.get(id=item_id)
             item.delete()
             return True
-        except ObjectDoesNotExist:
+        except Item.DoesNotExist:
             return False

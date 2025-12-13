@@ -3,10 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main" ]
-    tags: [ "v*" ]
+    tags: [ "v*" ]      
   pull_request:
     branches: [ "main" ]
 
+# STYLE POINT 1: Concurrency
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,8 +17,10 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # --- JOB 1: CI (Тестування та Лінтер) ---
   test:
     runs-on: ubuntu-latest
+    # STYLE POINT 2: Minimal Permissions (Безпека)
     permissions:
       contents: read
 
@@ -64,10 +67,10 @@ jobs:
           DB_PORT: 5432
           SECRET_KEY: 'test-secret-key-for-ci'
         run: |
-          # ВАЖЛИВО: Переходимо в папку app, де лежить manage.py
           cd app
           python manage.py test store
 
+  # --- JOB 2: CD (Delivery в GHCR) ---
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
@@ -88,6 +91,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # STYLE POINT 3: Smart Tags & Labels
+      # Генерує теги: main, sha-xxxx (коміт), v1.0 (якщо є тег)
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -96,6 +101,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=sha
+            type=semver,pattern={{version}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
