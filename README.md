@@ -71,3 +71,7 @@ docker compose up --build
 ```bash
 docker pull ghcr.io/valo2502/weblab1:master 
 ```
+### Як запустити образ:
+```bash
+docker run -p 8000:8000 ghcr.io/valo2502/weblab1:master
+```
