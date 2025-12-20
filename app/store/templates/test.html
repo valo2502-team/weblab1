@@ -75,18 +75,11 @@
 <script src="{% static 'js/script.js' %}"></script>
     
     <script>
-        // Зберігаємо оригінальну функцію (про всяк випадок), але не використовуємо її
         const originalLogStatus = window.logStatus;
         const consoleDiv = document.getElementById('console-output');
 
-        // Перевизначаємо функцію logStatus
         window.logStatus = function(message, isError = false) {
-            
-            // ❌ МИ ПРИБРАЛИ ЦЕЙ РЯДОК:
-            // if (originalLogStatus) originalLogStatus(message, isError);
-            // Тепер повідомлення не дублюються у правому нижньому куті.
 
-            // 2. Додаємо запис у наше вікно "System Log"
             const timestamp = new Date().toLocaleTimeString();
             const line = document.createElement('div');
             line.style.borderBottom = "1px solid #333";
@@ -95,28 +88,24 @@
             line.style.fontSize = "0.9rem";
             
             if (isError) {
-                line.style.color = "#ff6b6b"; // Червоний для помилок
+                line.style.color = "#ff6b6b";
             } else {
-                line.style.color = "#51cf66"; // Зелений для успіху
+                line.style.color = "#51cf66";
             }
 
-            // Якщо повідомлення - це об'єкт (JSON), перетворюємо в текст
             let text = message;
             if (typeof message === 'object') {
                 text = JSON.stringify(message, null, 2);
             }
 
-            // Форматуємо текст: [Час] Повідомлення
             line.innerHTML = `<span style="opacity:0.5">[${timestamp}]</span> <pre style="margin:0; display:inline;">${text}</pre>`;
             
             consoleDiv.appendChild(line);
             
-            // Автопрокрутка вниз
             consoleDiv.scrollTop = consoleDiv.scrollHeight;
         };
 
-        // Привітання в консолі
-        window.logStatus("Test Center initialized. Logs redirected to console only.");
+        window.logStatus("Test Center initialized.");
     </script>
 </body>
 </html>

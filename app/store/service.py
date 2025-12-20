@@ -7,7 +7,6 @@ class ItemService:
         if "name" not in data or not data["name"]:
             raise ValidationError("Name is required")
         
-        # Отримуємо ціну, якщо її немає — ставимо 0.00
         price = data.get("price", 0.00)
 
         item = Item.objects.create(name=data["name"], price=price)
@@ -16,7 +15,6 @@ class ItemService:
     @staticmethod
     def list_items():
         items = Item.objects.all()
-        # Повертаємо і ціну також
         return [{"id": item.id, "name": item.name, "price": str(item.price)} for item in items]
 
     @staticmethod
@@ -36,7 +34,6 @@ class ItemService:
             item = Item.objects.get(id=item_id)
             item.name = data["name"]
             
-            # Оновлюємо ціну, якщо вона передана
             if "price" in data:
                 item.price = data["price"]
             

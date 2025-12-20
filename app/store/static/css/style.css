@@ -2,13 +2,13 @@
    1. BASE RESET & TYPOGRAPHY
    ========================================= */
 :root {
-    --primary: #007bff;          /* Основний синій */
+    --primary: #007bff;          
     --primary-hover: #0056b3;
-    --success: #28a745;          /* Зелений для успіху/покупок */
-    --danger: #dc3545;           /* Червоний для видалення/помилок */
-    --warning: #ffc107;          /* Жовтий для попереджень */
-    --dark: #343a40;             /* Темний для навігації */
-    --light: #f8f9fa;            /* Світлий фон сторінки */
+    --success: #28a745;          
+    --danger: #dc3545;           
+    --warning: #ffc107;          
+    --dark: #343a40;             
+    --light: #f8f9fa;            
     --text-color: #333;
     --border-color: #dee2e6;
     --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -78,19 +78,17 @@ h1, h2, h3, h4, h5, h6 { margin-top: 0; font-weight: 600; }
 
 .nav-links {
     display: flex;
-    align-items: center; /* Вирівнюємо текст і кнопки по центру */
+    align-items: center;
 }
 
-/* Спільний стиль для посилань (a) та кнопок (button) у меню */
 .nav-links a,
 .nav-links button.nav-link-btn {
     color: rgba(255,255,255,0.75);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
-    margin-left: 20px; /* Відступ зліва для всіх елементів */
+    margin-left: 20px; 
     
-    /* Скидання стилів кнопки */
     background: none;
     border: none;
     padding: 0;
@@ -101,7 +99,7 @@ h1, h2, h3, h4, h5, h6 { margin-top: 0; font-weight: 600; }
 
 .nav-links a:hover,
 .nav-links button.nav-link-btn:hover {
-    color: #fff; /* Білий колір при наведенні */
+    color: #fff;
 }
 
 /* =========================================
@@ -346,16 +344,14 @@ table .btn { padding: 6px 12px; font-size: 0.85rem; margin-right: 5px; width: au
 
 .login-container input {
     margin-bottom: 15px;
-    /* Інші стилі input підтягуються з секції 6 */
 }
 
 .login-btn {
-    width: 100%; /* Розтягуємо кнопку на всю ширину */
+    width: 100%;
     font-size: 1.1rem;
     margin-top: 10px;
 }
 
-/* Мобільна адаптація */
 @media (max-width: 768px) {
     .navbar { flex-direction: column; text-align: center; gap: 10px; }
     .hero h1 { font-size: 2rem; }

@@ -70,7 +70,6 @@
     <script>
         const API_URL = "/items/";
 
-        // Завантажити товари при старті
         loadAdminItems();
 
         function toggleList() {
@@ -104,7 +103,6 @@
 
                 items.forEach(item => {
                     const row = document.createElement("tr");
-                    // Якщо ціни немає, показуємо 0
                     const price = item.price ? item.price : ""; 
                     
                     row.innerHTML = `
@@ -134,7 +132,6 @@
             if (!name) return alert("Please enter a name");
 
             try {
-                // Використовуємо fetchWithRetry з script.js
                 await fetchWithRetry(API_URL, {
                     method: "POST",
                     headers: { 

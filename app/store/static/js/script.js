@@ -1,10 +1,8 @@
-// --- Глобальний стан для Degraded Mode ---
 let failureCount = 0;
 const FAILURE_THRESHOLD = 3;
 const DEGRADED_COOLDOWN = 10000;
 let isDegraded = false;
 
-// --- Функції UI ---
 
 function setDegradedMode(active) {
     isDegraded = active;
@@ -36,8 +34,6 @@ function logStatus(message, isError = false) {
     else console.log(message);
 }
 
-// Єдиний формат помилки
-// { error, code?, details?, requestId }
 async function normalizeError(error, response = null) {
     let errorObj = {
         error: error.message || "Unknown Error",
@@ -57,7 +53,6 @@ async function normalizeError(error, response = null) {
     return errorObj;
 }
 
-// Функція для отримання CSRF токена з cookies (стандарт Django)
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -73,9 +68,8 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Оновлена функція fetchWithRetry
+
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 500) {
-    // Додаємо CSRF токен до заголовків, якщо це не GET запит
     if (options.method && options.method !== 'GET') {
         const csrftoken = getCookie('csrftoken');
         if (csrftoken) {
@@ -84,14 +78,12 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 500) {
                 'X-CSRFToken': csrftoken
             };
         }
-        // Також важливо передати credentials, щоб сервер бачив сесію
         options.credentials = 'same-origin'; 
     }
 
     try {
         const response = await fetch(url, options);
 
-        // Обробка 429 (Too Many Requests)
         if (response.status === 429) {
             if (retries > 0) {
                 logStatus(`⚠️ Rate limit hit. Retrying in ${backoff}ms...`, true);
@@ -103,14 +95,12 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 500) {
             }
         }
         
-        // Обробка 401 (Unauthorized) - якщо сесія закінчилась
         if (response.status === 401) {
-             window.location.href = '/login/'; // Перекидаємо на логін
+             window.location.href = '/login/'; 
              throw { error: "Unauthorized" };
         }
 
         if (response.status === 500) {
-             // ... логіка для 500 помилки (залиште як було) ...
              throw { error: "Server Error" };
         }
 
@@ -126,11 +116,9 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 500) {
     }
 }
 
-// 1. Health Check (Вимога: Таймаут 1c)
 document.getElementById("btn_health").addEventListener("click", async () => {
     try {
         logStatus("Checking health (Timeout limit: 1s)...");
-        // Передаємо timeout: 1000 (1 секунда)
         const res = await fetchWithRetry("http://127.0.0.1:8000/health/", {}, 1, 1000);
         const data = await res.json();
         logStatus(data);
@@ -139,14 +127,12 @@ document.getElementById("btn_health").addEventListener("click", async () => {
     }
 });
 
-// 2. Load Items (Стандартний запит)
 document.getElementById("btn_load").addEventListener("click", async () => {
     try {
         logStatus("Loading items...");
         const res = await fetchWithRetry("http://127.0.0.1:8000/items/");
         const data = await res.json();
         
-        // Рендер списку
         const list = document.getElementById("list");
         list.innerHTML = "";
         data.forEach(item => {
@@ -160,7 +146,6 @@ document.getElementById("btn_load").addEventListener("click", async () => {
     }
 });
 
-// 3. Test Timeout (Симулюємо "повільний" сервер)
 document.getElementById("btn_timeout").addEventListener("click", async () => {
     try {
         logStatus("Testing Timeout logic (Requesting 2s sleep, Timeout set to 1s)...");
@@ -171,11 +156,9 @@ document.getElementById("btn_timeout").addEventListener("click", async () => {
     }
 });
 
-// 4. Test 500 (Для перевірки Degraded Mode)
 document.getElementById("btn_500").addEventListener("click", async () => {
     try {
         logStatus(`Sending request to trigger 500... (Current Failures: ${failureCount})`);
-        // Це викличе помилку. Натисніть кілька разів, щоб побачити банер Degraded Mode
         await fetchWithRetry("http://127.0.0.1:8000/items/simulate/?status=500", {}, 2, 2000); 
         logStatus("Success (Recovered from 500)");
     } catch (err) {
@@ -183,7 +166,6 @@ document.getElementById("btn_500").addEventListener("click", async () => {
     }
 });
 
-// 5. Test 429
 document.getElementById("btn_429").addEventListener("click", async () => {
     try {
         logStatus("Testing 429 Rate Limit...");
