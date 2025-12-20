@@ -1,29 +1,29 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 import json
 import time
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required # Для сторінок
 from django.db import transaction 
 from django.core.exceptions import ValidationError
+
+# Прибираємо csrf_exempt з імпортів, він більше не потрібен
+# from django.views.decorators.csrf import csrf_exempt 
+
 from .service import ItemService
 from .models import IdempotencyRecord 
 
-# --- Симуляція помилок та затримок ---
-@csrf_exempt
+# --- Симуляція помилок (API для тестів) ---
+# Тут csrf_exempt можна було б лишити, якщо це тільки GET, 
+# але краще прибрати для чистоти коду.
 def simulate_error_api(request):
-    """
-    Імітує помилки 500, 429, затримки (sleep) для тестування клієнта.
-    """
     status_code = request.GET.get('status', '200')
     
-    # 1. СИМУЛЯЦІЯ ТАЙМАУТУ (Sleep)
     if status_code == 'sleep':
         duration = float(request.GET.get('duration', 2.0))
-        time.sleep(duration) # Сервер "засинає"
+        time.sleep(duration)
         return JsonResponse({"status": "Woke up"}, status=200)
 
-    # 2. Логіка помилки 429 (Rate Limit)
     if status_code == '429':
         if request.session.get('simulate_429_count', 0) < 1:
             request.session['simulate_429_count'] = 1
@@ -36,7 +36,6 @@ def simulate_error_api(request):
             request.session.modified = True
             return JsonResponse({"status": "Success after 429"}, status=200)
     
-    # 3. Логіка помилки 500 (Internal Server Error)
     elif status_code == '500':
         current_count = request.session.get('simulate_500_count', 0)
         if current_count < 2: 
@@ -50,11 +49,16 @@ def simulate_error_api(request):
 
     return JsonResponse({"status": "ok"}, status=200)
 
-# --- Основні Views ---
+# --- Сторінки (HTML) ---
 
 def item_list_page(request):
     return render(request, 'index.html', {})
 
+def test_page(request):
+    return render(request, 'test.html', {})
+
+# ЗАХИСТ: Тільки для залогінених (перенаправить на /login/)
+@login_required
 def admin_page(request):
     return render(request, 'admin.html', {})
 
@@ -63,7 +67,9 @@ def health(request):
         time.sleep(2)
     return JsonResponse({"status": "ok"})
 
-@csrf_exempt
+# --- API (JSON) ---
+
+# ПРИБРАЛИ @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def items_api(request):
     if request.method == "GET":
@@ -71,6 +77,10 @@ def items_api(request):
         return JsonResponse(items, safe=False)
         
     elif request.method == "POST":
+        # ЗАХИСТ: Перевіряємо, чи користувач залогінився
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+
         idempotency_key = request.headers.get('Idempotency-Key')
         endpoint = request.path_info
         
@@ -106,14 +116,19 @@ def items_api(request):
         except Exception:
             return JsonResponse({"error": "Internal Server Error"}, status=500)
 
-@csrf_exempt
+# ПРИБРАЛИ @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 def item_detail_api(request, item_id):
+    # GET доступний всім (щоб бачити ціни на головній)
     if request.method == "GET":
         item = ItemService.get_item(item_id)
         if not item:
             return JsonResponse({"error": "Item not found"}, status=404)
         return JsonResponse(item)
+
+    # ЗАХИСТ: Редагування та видалення - тільки для адмінів
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
     elif request.method == "PUT":
         try:

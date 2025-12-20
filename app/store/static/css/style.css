@@ -1,108 +1,362 @@
+/* =========================================
+   1. BASE RESET & TYPOGRAPHY
+   ========================================= */
+:root {
+    --primary: #007bff;          /* Основний синій */
+    --primary-hover: #0056b3;
+    --success: #28a745;          /* Зелений для успіху/покупок */
+    --danger: #dc3545;           /* Червоний для видалення/помилок */
+    --warning: #ffc107;          /* Жовтий для попереджень */
+    --dark: #343a40;             /* Темний для навігації */
+    --light: #f8f9fa;            /* Світлий фон сторінки */
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    --hover-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: sans-serif;
-    padding: 20px;
-    max-width: 800px;
+    background-color: var(--light);
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 { margin-top: 0; font-weight: 600; }
+
+/* =========================================
+   2. LAYOUT & CONTAINERS
+   ========================================= */
+.container {
+    max-width: 1200px;
     margin: 0 auto;
-    background-color: #fdfdfd;
+    padding: 20px;
+    width: 100%;
 }
 
-/* --- Заголовки та текст --- */
-h1, h2, h3 {
-    color: #333;
-}
-
-/* --- Банер Degraded Mode --- */
-#degraded-banner {
-    display: none; /* Приховано за замовчуванням */
-    background-color: #ffcc00;
-    color: #333;
-    padding: 15px;
-    text-align: center;
-    font-weight: bold;
-    border: 1px solid #e6b800;
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    padding: 20px;
     margin-bottom: 20px;
-    border-radius: 5px;
+    border: 1px solid #e3e6f0;
 }
 
-/* --- Кнопки --- */
-button {
-    padding: 8px 12px;
-    cursor: pointer;
-    margin: 5px;
+/* =========================================
+   3. NAVIGATION (Всі сторінки)
+   ========================================= */
+.navbar {
+    background-color: var(--dark);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center; /* Вирівнюємо текст і кнопки по центру */
+}
+
+/* Спільний стиль для посилань (a) та кнопок (button) у меню */
+.nav-links a,
+.nav-links button.nav-link-btn {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    margin-left: 20px; /* Відступ зліва для всіх елементів */
+    
+    /* Скидання стилів кнопки */
+    background: none;
     border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: opacity 0.2s;
+    padding: 0;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
 }
 
-button:disabled {
-    background-color: #ccc !important;
-    cursor: not-allowed;
-    opacity: 0.7;
-    color: #666;
+.nav-links a:hover,
+.nav-links button.nav-link-btn:hover {
+    color: #fff; /* Білий колір при наведенні */
 }
 
-button:hover:not(:disabled) {
-    opacity: 0.9;
+/* =========================================
+   4. HERO SECTION (Index.html)
+   ========================================= */
+.hero {
+    background: linear-gradient(135deg, var(--primary), #6610f2);
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+.hero h1 { font-size: 3rem; margin-bottom: 15px; }
+.hero p { font-size: 1.25rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+
+/* =========================================
+   5. PRODUCT GRID (Index.html)
+   ========================================= */
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2rem;
+    color: var(--dark);
 }
 
-.api-btn {
-    padding: 10px 15px;
-    font-size: 15px;
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+    padding-bottom: 60px;
 }
 
-/* Кольори кнопок */
-.btn-save { background-color: #28a745; color: white; }
-.btn-delete { background-color: #dc3545; color: white; }
-.btn-add { background-color: #007bff; color: white; font-size: 16px; }
-.btn-test { background-color: #f0f0f0; border: 1px solid #ccc; color: #333; }
+.product-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
 
-/* --- Елементи списку та форми (Admin) --- */
-.item-row {
+.card-img-placeholder {
+    background-color: #e9ecef;
+    height: 160px;
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    background: #fff;
-    border-radius: 4px;
+    justify-content: center;
+    font-size: 3rem;
+    color: #adb5bd;
 }
 
-.item-row span {
-    margin-right: 10px;
-    font-weight: bold;
-    color: #555;
-    min-width: 30px;
-}
-
-.item-row input {
-    flex-grow: 1;
-    padding: 8px;
-    margin-right: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.add-section {
-    background: #f0f0f0;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
-
-/* --- Область статусів --- */
-#status-area {
-    margin-top: 20px;
+.card-body {
     padding: 15px;
-    border: 1px solid #ddd;
-    background: #f9f9f9;
-    min-height: 50px;
-    font-family: monospace;
-    border-radius: 4px;
-    white-space: pre-wrap; /* Зберігає форматування JSON */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.error-msg { color: #d32f2f; font-weight: bold; }
-.success-msg { color: #388e3c; }
+.card-title { font-size: 1.1rem; margin: 0 0 10px; color: var(--text-color); }
+.card-price { font-size: 1.3rem; color: var(--success); font-weight: 700; margin-bottom: 15px; }
+
+/* =========================================
+   6. FORMS & INPUTS
+   ========================================= */
+input[type="text"], input[type="number"], input[type="password"], select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff;
+}
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+}
+.add-section-wrapper { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+
+/* =========================================
+   7. BUTTONS
+   ========================================= */
+.btn, .btn-buy, .btn-add, .btn-save, .btn-delete, .api-btn, .login-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: white;
+    line-height: 1.5;
+}
+
+/* Primary */
+.btn-primary, .btn-buy, .btn-save, .login-btn { background-color: var(--primary); }
+.btn-primary:hover, .btn-buy:hover, .btn-save:hover, .login-btn:hover { background-color: var(--primary-hover); }
+
+/* Success */
+.btn-success, .btn-add { background-color: var(--success); }
+.btn-success:hover, .btn-add:hover { background-color: #218838; }
+
+/* Danger */
+.btn-danger, .btn-delete { background-color: var(--danger); }
+.btn-danger:hover, .btn-delete:hover { background-color: #c82333; }
+
+/* Outline */
+.btn-outline, .btn-test {
+    background-color: transparent;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+}
+.btn-outline:hover, .btn-test:hover { background-color: #6c757d; color: white; }
+
+/* Table Buttons */
+table .btn { padding: 6px 12px; font-size: 0.85rem; margin-right: 5px; width: auto; }
+
+/* =========================================
+   8. TABLES (Admin.html)
+   ========================================= */
+.table-wrapper { overflow-x: auto; width: 100%; }
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    min-width: 600px;
+}
+.admin-table th, .admin-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+.admin-table th {
+    background-color: #f1f3f5;
+    color: var(--dark);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+.admin-table tr:hover { background-color: #f8f9fa; }
+.admin-table input { padding: 6px 10px; font-size: 0.9rem; }
+
+/* =========================================
+   9. TEST PAGE ELEMENTS
+   ========================================= */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.status-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    border-left: 5px solid var(--border-color);
+}
+.status-card.success { border-left-color: var(--success); }
+.status-card.error { border-left-color: var(--danger); }
+.status-card.warning { border-left-color: var(--warning); }
+
+.console-output {
+    background-color: #1e1e1e;
+    color: #0f0;
+    font-family: 'Consolas', 'Monaco', monospace;
+    padding: 20px;
+    border-radius: 8px;
+    height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    border: 1px solid #333;
+}
+
+/* =========================================
+   10. NOTIFICATIONS
+   ========================================= */
+#degraded-banner {
+    background-color: var(--warning);
+    color: #856404;
+    text-align: center;
+    padding: 12px;
+    font-weight: 700;
+    display: none;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+#status-area {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.status-msg {
+    background: #333;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    font-size: 0.95rem;
+    animation: slideUpFade 0.4s ease-out forwards;
+    display: flex;
+    align-items: center;
+}
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   11. AUTH PAGES (Login)
+   ========================================= */
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.login-container h2 {
+    margin-bottom: 10px;
+    color: var(--dark);
+}
+
+.login-container input {
+    margin-bottom: 15px;
+    /* Інші стилі input підтягуються з секції 6 */
+}
+
+.login-btn {
+    width: 100%; /* Розтягуємо кнопку на всю ширину */
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+/* Мобільна адаптація */
+@media (max-width: 768px) {
+    .navbar { flex-direction: column; text-align: center; gap: 10px; }
+    .hero h1 { font-size: 2rem; }
+}

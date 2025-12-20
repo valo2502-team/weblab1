@@ -3,152 +3,180 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Team Shop Admin</title>
+    <title>Admin Panel - Team Shop</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .list-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 30px;
-            margin-bottom: 10px;
-        }
-        .list-header h3 {
-            margin: 0;
-        }
-    </style>
 </head>
 <body>
 
     <div id="degraded-banner">⚠️ System overloaded. Editing functions limited.</div>
 
-    <h1>⚙️ Admin Panel</h1>
+<nav class="navbar">
+        <a href="/custom-admin/" class="navbar-brand">⚙️ Admin Panel</a>
+        <div class="nav-links">
+            <span style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">
+                User: {{ user.username }}
+            </span>
+            
+            <a href="/">🏠 Home</a>
+            <a href="/test/">🔧 Test Center</a>
+            
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="nav-link-btn">Log Out</button>
+            </form>
+        </div>
+    </nav>
 
-    <div class="add-section">
-        <h3>Add New Item</h3>
-        <div style="display: flex;">
-            <input type="text" id="new-item-name" placeholder="Item name..." style="flex-grow: 1; padding: 10px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;">
-            <button class="btn-add api-btn" onclick="createItem()">Create</button>
+    <div class="container">
+        <h1>Inventory Management</h1>
+
+        <div class="card">
+            <h3>Add New Item</h3>
+            <div class="add-section-wrapper">
+                <input type="text" id="new-item-name" placeholder="Item Name (e.g. Laptop)" style="flex: 2;">
+                <input type="number" id="new-item-price" placeholder="Price $" step="0.01" style="flex: 1;">
+                <button class="btn btn-success" onclick="createItem()">+ Add Item</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Current Inventory</h3>
+                <button id="btn-toggle-list" class="btn btn-outline" onclick="toggleList()">Hide List</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th>Name</th>
+                            <th style="width: 150px;">Price ($)</th>
+                            <th style="width: 160px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-list-body">
+                        </tbody>
+                </table>
+                <div id="loading-msg" style="text-align:center; padding: 20px; color: #6c757d;">Loading data...</div>
+            </div>
         </div>
     </div>
-
-    <div class="list-header">
-        <h3>Items List</h3>
-        <button id="btn-toggle-list" class="api-btn btn-test" onclick="toggleList()">Hide list</button>
-    </div>
-
-    <div id="admin-list">Loading...</div>
 
     <div id="status-area"></div>
 
     <script src="{% static 'js/script.js' %}"></script>
 
     <script>
-        const API_URL = "http://127.0.0.1:8000/items/";
+        const API_URL = "/items/";
 
-        // Load on start
+        // Завантажити товари при старті
         loadAdminItems();
 
         function toggleList() {
-            const list = document.getElementById("admin-list");
+            const table = document.querySelector(".table-wrapper");
             const btn = document.getElementById("btn-toggle-list");
-            
-            if (list.style.display === "none") {
-                list.style.display = "block";
-                btn.textContent = "Hide list";
-                if (list.innerHTML === "") loadAdminItems(); 
+            if (table.style.display === "none") {
+                table.style.display = "block";
+                btn.textContent = "Hide List";
+                loadAdminItems();
             } else {
-                list.style.display = "none";
-                btn.textContent = "Show list";
+                table.style.display = "none";
+                btn.textContent = "Show List";
             }
         }
 
         async function loadAdminItems() {
-            const list = document.getElementById("admin-list");
-            if (list.style.display === "none") return;
-
+            const tbody = document.getElementById("admin-list-body");
+            const loader = document.getElementById("loading-msg");
+            
             try {
-                if (!list.innerHTML.includes("input")) list.innerHTML = "Updating...";
-                
                 const res = await fetchWithRetry(API_URL);
                 const items = await res.json();
+                
+                tbody.innerHTML = "";
+                loader.style.display = "none";
 
-                list.innerHTML = "";
-                items.forEach((item, index) => {
-                    const row = document.createElement("div");
-                    row.className = "item-row";
+                if (items.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No items found. Add one above!</td></tr>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const row = document.createElement("tr");
+                    // Якщо ціни немає, показуємо 0
+                    const price = item.price ? item.price : ""; 
+                    
                     row.innerHTML = `
-                        <span style="min-width: 30px; font-weight:bold;">#${index + 1}</span>
-                        <span style="color: #999; font-size: 0.8em; margin-right: 10px;">(id: ${item.id})</span>
-                        <input type="text" id="input-${item.id}" value="${item.name}">
-                        <button class="btn-save api-btn" onclick="updateItem(${item.id})">Save</button>
-                        <button class="btn-delete api-btn" onclick="deleteItem(${item.id})">Delete</button>
+                        <td>${item.id}</td>
+                        <td><input type="text" id="name-${item.id}" value="${item.name}" class="form-control"></td>
+                        <td><input type="number" id="price-${item.id}" value="${price}" step="0.01" class="form-control"></td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-primary" onclick="updateItem(${item.id})">Save</button>
+                            <button class="btn btn-danger" onclick="deleteItem(${item.id})">Del</button>
+                        </td>
                     `;
-                    list.appendChild(row);
+                    tbody.appendChild(row);
                 });
                 logStatus(`Loaded ${items.length} items.`);
             } catch (err) {
-                logStatus(`Error loading items: ${err.error}`, true);
+                loader.textContent = "Error loading data.";
+                logStatus("Failed to load items", true);
             }
         }
 
-        // CREATE (POST)
         async function createItem() {
-            const input = document.getElementById("new-item-name");
-            const name = input.value;
-            if (!name) return alert("Enter a name!");
+            const nameInput = document.getElementById("new-item-name");
+            const priceInput = document.getElementById("new-item-price");
+            const name = nameInput.value;
+            const price = parseFloat(priceInput.value) || 0;
 
-            const idempotencyKey = "create-" + Date.now(); 
+            if (!name) return alert("Please enter a name");
 
             try {
+                // Використовуємо fetchWithRetry з script.js
                 await fetchWithRetry(API_URL, {
                     method: "POST",
-                    headers: {
+                    headers: { 
                         "Content-Type": "application/json",
-                        "Idempotency-Key": idempotencyKey
+                        "Idempotency-Key": "create-" + Date.now()
                     },
-                    body: JSON.stringify({ name: name })
+                    body: JSON.stringify({ name, price })
                 });
-                input.value = ""; 
                 
-                const list = document.getElementById("admin-list");
-                if (list.style.display !== "none") {
-                    loadAdminItems(); 
-                }
-                
-                logStatus("Item created.");
+                nameInput.value = "";
+                priceInput.value = "";
+                loadAdminItems();
+                logStatus("Item created successfully");
             } catch (err) {
-                logStatus(`Create failed: ${err.error}`, true);
+                logStatus("Create failed: " + (err.error || err.message), true);
             }
         }
 
-        // UPDATE (PUT)
         async function updateItem(id) {
-            const newName = document.getElementById(`input-${id}`).value;
+            const name = document.getElementById(`name-${id}`).value;
+            const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
+
             try {
                 await fetchWithRetry(`${API_URL}${id}/`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: newName })
+                    body: JSON.stringify({ name, price })
                 });
-                logStatus(`Item ${id} updated.`);
+                logStatus(`Item ${id} updated`);
             } catch (err) {
-                logStatus(`Update failed: ${err.error}`, true);
+                logStatus("Update failed", true);
             }
         }
 
-        // DELETE (DELETE)
         async function deleteItem(id) {
-            if(!confirm("Are you sure?")) return;
-
+            if (!confirm("Delete this item?")) return;
             try {
-                await fetchWithRetry(`${API_URL}${id}/`, {
-                    method: "DELETE"
-                });
-                loadAdminItems(); 
-                logStatus(`Item ${id} deleted.`);
+                await fetchWithRetry(`${API_URL}${id}/`, { method: "DELETE" });
+                loadAdminItems();
+                logStatus(`Item ${id} deleted`);
             } catch (err) {
-                logStatus(`Delete failed: ${err.error}`, true);
+                logStatus("Delete failed", true);
             }
         }
     </script>
