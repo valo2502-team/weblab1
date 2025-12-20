@@ -53,6 +53,7 @@ docker compose up
 | Сторінка | URL | Опис |
 | :--- | :--- | :--- |
 | **Магазин (Клієнт)** | [http://localhost:8000/](http://localhost:8000/) | Головний інтерфейс клієнта зі списком товарів. |
+| **Сторінка входу** | [http://localhost:8000/login/](http://localhost:8000/login/) | Інтерфейс для входу в адмін-панель. |
 | **Адмін-панель** | [http://localhost:8000/custom-admin/](http://localhost:8000/custom-admin/) | Інтерфейс для створення, редагування та видалення товарів. |
 | **API Endpoint** | [http://localhost:8000/items/](http://localhost:8000/items/) | "Сира" JSON відповідь API. |
 | **Health Check** | [http://localhost:8000/health/](http://localhost:8000/health/) | Перевірка стану системи (суворий таймаут 1с). |
