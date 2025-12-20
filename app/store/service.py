@@ -6,20 +6,24 @@ class ItemService:
     def create_item(data):
         if "name" not in data or not data["name"]:
             raise ValidationError("Name is required")
+        
+        # Отримуємо ціну, якщо її немає — ставимо 0.00
+        price = data.get("price", 0.00)
 
-        item = Item.objects.create(name=data["name"])
-        return {"id": item.id, "name": item.name}
+        item = Item.objects.create(name=data["name"], price=price)
+        return {"id": item.id, "name": item.name, "price": str(item.price)}
 
     @staticmethod
     def list_items():
         items = Item.objects.all()
-        return [{"id": item.id, "name": item.name} for item in items]
+        # Повертаємо і ціну також
+        return [{"id": item.id, "name": item.name, "price": str(item.price)} for item in items]
 
     @staticmethod
     def get_item(item_id):
         try:
             item = Item.objects.get(id=item_id)
-            return {"id": item.id, "name": item.name}
+            return {"id": item.id, "name": item.name, "price": str(item.price)}
         except Item.DoesNotExist:
             return None
 
@@ -31,8 +35,13 @@ class ItemService:
         try:
             item = Item.objects.get(id=item_id)
             item.name = data["name"]
+            
+            # Оновлюємо ціну, якщо вона передана
+            if "price" in data:
+                item.price = data["price"]
+            
             item.save()
-            return {"id": item.id, "name": item.name}
+            return {"id": item.id, "name": item.name, "price": str(item.price)}
         except Item.DoesNotExist:
             return None
 

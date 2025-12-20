@@ -3,48 +3,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Team Shop Client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Shop - Home</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
-    <div id="degraded-banner">⚠️ System overloaded. Degraded Mode enabled.</div>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">🛍️ Team Shop</a>
+        <div class="nav-links">
+            <a href="/test/">🔧 Test Area</a>
+            <a href="/custom-admin/">⚙️ Admin Panel</a>
+        </div>
+    </nav>
 
-    <h2>🛍️ Shop Client</h2>
-    
-    <div style="margin-bottom: 10px;">
-        <button id="btn_load" class="api-btn btn-add">Load Items</button>
-        <button id="btn_toggle_list" class="api-btn btn-test" onclick="toggleList()">Hide list</button>
-        <button id="btn_health" class="api-btn btn-test">Check Health (Timeout 1s)</button>
+    <div class="hero">
+        <h1>Welcome!</h1>
+        <p>The best equipment for your team's efficiency.</p>
     </div>
 
-    <ul id="list"></ul>
-    
-    <div id="status-area">Waiting for actions...</div>
+    <div class="container">
+        <h2 class="section-title">Product Catalog</h2>
+        
+        <div id="items-grid" class="items-grid">
+            <p style="text-align:center; width:100%; color:#777;">Loading products...</p>
+        </div>
+    </div>
 
-    <hr>
-    <h3>Testing (Simulation):</h3>
-    <button id="btn_500" class="api-btn btn-test">Test 500 (Retry & Degraded)</button>
-    <button id="btn_429" class="api-btn btn-test">Test 429 (Rate Limit)</button>
-    <button id="btn_timeout" class="api-btn btn-test">Test Timeout (Server sleeps 2s)</button>
-    <hr>
-
-    <script src="{% static 'js/script.js' %}"></script>
-    
     <script>
-        // --- List Visibility Toggle ---
-        function toggleList() {
-            const list = document.getElementById("list");
-            const btn = document.getElementById("btn_toggle_list");
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('items-grid');
             
-            if (list.style.display === "none") {
-                list.style.display = "block";
-                btn.textContent = "Hide list";
-            } else {
-                list.style.display = "none";
-                btn.textContent = "Show list";
+            try {
+                const response = await fetch('/items/');
+                if (!response.ok) throw new Error('Failed to load');
+                const items = await response.json();
+
+                grid.innerHTML = ''; 
+
+                if (items.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; width:100%;">No products available yet.</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const displayPrice = item.price ? item.price : "0.00";
+                    
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <div class="card-img-placeholder">📦</div>
+                        <div class="card-body">
+                            <h3 class="card-title">${item.name}</h3>
+                            <div class="card-price">$${displayPrice}</div>
+                            <button class="btn-buy" onclick="alert('Buying feature coming soon!')">Buy</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (error) {
+                grid.innerHTML = `<p style="text-align:center; color:red; width:100%;">Failed to load catalog: ${error.message}</p>`;
             }
-        }
+        });
     </script>
 </body>
 </html>

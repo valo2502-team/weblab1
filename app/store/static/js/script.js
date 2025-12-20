@@ -57,72 +57,72 @@ async function normalizeError(error, response = null) {
     return errorObj;
 }
 
-async function fetchWithRetry(url, options = {}, maxRetries = 3, timeout = 5000) {
-    // 1. Перевірка Degraded Mode: якщо активний, не шлемо запити
-    if (isDegraded) {
-        throw { error: "System overloaded (Client-side protection)", code: "DEGRADED_MODE" };
+// Функція для отримання CSRF токена з cookies (стандарт Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Оновлена функція fetchWithRetry
+async function fetchWithRetry(url, options = {}, retries = 3, backoff = 500) {
+    // Додаємо CSRF токен до заголовків, якщо це не GET запит
+    if (options.method && options.method !== 'GET') {
+        const csrftoken = getCookie('csrftoken');
+        if (csrftoken) {
+            options.headers = {
+                ...options.headers,
+                'X-CSRFToken': csrftoken
+            };
+        }
+        // Також важливо передати credentials, щоб сервер бачив сесію
+        options.credentials = 'same-origin'; 
     }
 
-    let delay = 1000;
+    try {
+        const response = await fetch(url, options);
 
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-        // 2. Таймаут клієнта через AbortController
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-        const fetchOptions = { ...options, signal: controller.signal };
-
-        try {
-            const response = await fetch(url, fetchOptions);
-            clearTimeout(timeoutId);
-
-            // 3. Обробка 429 (Rate Limit)
-            if (response.status === 429) {
-                const retryAfterHeader = response.headers.get('Retry-After');
-                const waitTime = retryAfterHeader ? parseInt(retryAfterHeader, 10) * 1000 : 5000;
-                
-                console.warn(`[429] Rate Limit. Waiting ${waitTime}ms (Retry-After)`);
-                await new Promise(r => setTimeout(r, waitTime));
-                continue; 
-            }
-
-            // 4. Успіх або клієнтська помилка (4xx окрім 429 не ретраїмо)
-            if (response.ok || response.status < 500) {
-                if (response.ok) failureCount = 0; // Скидаємо лічильник збоїв при успіху
-                return response;
-            }
-
-            // Помилка 5xx -> викликати catch для запуску логіки ретраю
-            throw new Error(`Server Error ${response.status}`);
-
-        } catch (error) {
-            clearTimeout(timeoutId); 
-
-            const isLastAttempt = attempt === maxRetries - 1;
-            
-            const errorData = await normalizeError(error, null);
-
-            if (error.name === 'AbortError') {
-                console.error(`[TIMEOUT] Request aborted after ${timeout}ms`);
+        // Обробка 429 (Too Many Requests)
+        if (response.status === 429) {
+            if (retries > 0) {
+                logStatus(`⚠️ Rate limit hit. Retrying in ${backoff}ms...`, true);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2); 
             } else {
-                console.error(`[Attempt ${attempt + 1}] Failed: ${errorData.error}`);
+                enterDegradedMode(); 
+                throw { error: "Rate limit exceeded. System degraded." };
             }
-
-            if (isLastAttempt) {
-                failureCount++;
-                if (failureCount >= FAILURE_THRESHOLD) {
-                    setDegradedMode(true);
-                }
-                throw errorData;
-            }
-
-            // Експоненційний Backoff з Джитером перед наступною спробою
-            const base = delay * Math.pow(2, attempt);
-            const jitter = Math.random() * base; 
-            const waitTime = Math.min(base + jitter, 10000);
-            
-            console.log(`Waiting ${Math.round(waitTime)}ms before next retry...`);
-            await new Promise(r => setTimeout(r, waitTime));
         }
+        
+        // Обробка 401 (Unauthorized) - якщо сесія закінчилась
+        if (response.status === 401) {
+             window.location.href = '/login/'; // Перекидаємо на логін
+             throw { error: "Unauthorized" };
+        }
+
+        if (response.status === 500) {
+             // ... логіка для 500 помилки (залиште як було) ...
+             throw { error: "Server Error" };
+        }
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw { error: errorData.error || `HTTP Error ${response.status}` };
+        }
+
+        return response;
+
+    } catch (err) {
+        throw err;
     }
 }
 

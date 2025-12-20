@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Center - Team Shop</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <div id="degraded-banner">⚠️ System overloaded. Degraded Mode enabled.</div>
+
+    <nav class="navbar">
+        <a href="/test/" class="navbar-brand">🔧 Test Center</a>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/custom-admin/">⚙️ Admin Panel</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>System Diagnostics</h1>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+            
+            <div>
+                <div class="card">
+                    <h3>Basic Operations</h3>
+                    <button id="btn_health" class="btn btn-success" style="width: 100%; margin-bottom: 10px;">
+                        🏥 Check Health (1s Timeout)
+                    </button>
+                    <button id="btn_load" class="btn btn-primary" style="width: 100%;">
+                        📦 Load Items
+                    </button>
+                </div>
+
+                <div class="card" style="border-left: 5px solid var(--danger);">
+                    <h3>Chaos Engineering</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+                        Test client resilience (Retries, Backoff, Degraded Mode).
+                    </p>
+                    <button id="btn_500" class="btn btn-danger" style="width: 100%; margin-bottom: 10px;">
+                        💥 Simulate 500 Error
+                    </button>
+                    <button id="btn_429" class="btn btn-danger" style="width: 100%; margin-bottom: 10px;">
+                        ✋ Simulate 429 (Rate Limit)
+                    </button>
+                    <button id="btn_timeout" class="btn btn-danger" style="width: 100%;">
+                        zzZ Simulate Timeout (Sleep 2s)
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3>Loaded Items</h3>
+                    <ul id="list" style="padding-left: 20px; min-height: 40px; margin-bottom: 0;">
+                        <li style="color: #999; list-style: none;">Waiting for data...</li>
+                    </ul>
+                </div>
+
+                <div class="card" style="background: #1e1e1e; border: none; padding: 0; overflow: hidden;">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid #333; color: #fff; font-weight: bold; display: flex; justify-content: space-between; background: #252526;">
+                        <span>📟 System Log</span>
+                        <span style="font-size: 0.8rem; color: #aaa; cursor: pointer;" onclick="document.getElementById('console-output').innerHTML=''">[Clear]</span>
+                    </div>
+                    <div id="console-output" class="console-output" style="height: 300px; border: none; border-radius: 0 0 8px 8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status-area"></div>
+
+<script src="{% static 'js/script.js' %}"></script>
+    
+    <script>
+        // Зберігаємо оригінальну функцію (про всяк випадок), але не використовуємо її
+        const originalLogStatus = window.logStatus;
+        const consoleDiv = document.getElementById('console-output');
+
+        // Перевизначаємо функцію logStatus
+        window.logStatus = function(message, isError = false) {
+            
+            // ❌ МИ ПРИБРАЛИ ЦЕЙ РЯДОК:
+            // if (originalLogStatus) originalLogStatus(message, isError);
+            // Тепер повідомлення не дублюються у правому нижньому куті.
+
+            // 2. Додаємо запис у наше вікно "System Log"
+            const timestamp = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.style.borderBottom = "1px solid #333";
+            line.style.padding = "5px 10px";
+            line.style.fontFamily = "monospace";
+            line.style.fontSize = "0.9rem";
+            
+            if (isError) {
+                line.style.color = "#ff6b6b"; // Червоний для помилок
+            } else {
+                line.style.color = "#51cf66"; // Зелений для успіху
+            }
+
+            // Якщо повідомлення - це об'єкт (JSON), перетворюємо в текст
+            let text = message;
+            if (typeof message === 'object') {
+                text = JSON.stringify(message, null, 2);
+            }
+
+            // Форматуємо текст: [Час] Повідомлення
+            line.innerHTML = `<span style="opacity:0.5">[${timestamp}]</span> <pre style="margin:0; display:inline;">${text}</pre>`;
+            
+            consoleDiv.appendChild(line);
+            
+            // Автопрокрутка вниз
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        };
+
+        // Привітання в консолі
+        window.logStatus("Test Center initialized. Logs redirected to console only.");
+    </script>
+</body>
+</html>
